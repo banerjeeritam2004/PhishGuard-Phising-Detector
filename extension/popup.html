@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PhishGuard</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+    :root {
+      --safe: #22c55e;
+      --phish: #ef4444;
+      --warn: #f59e0b;
+      --gray: #6b7280;
+      --bg: #0a0a0a;
+      --surface: #141414;
+      --border: #222;
+      --text: #f3f4f6;
+      --sub: #9ca3af;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 340px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      overflow: hidden;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .logo {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .header-text h1 { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+    .header-text p { font-size: 11px; color: var(--sub); }
+    .server-dot {
+      margin-left: auto;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--gray);
+      transition: background 0.3s;
+    }
+    .server-dot.ok { background: var(--safe); box-shadow: 0 0 6px rgba(34,197,94,0.6); }
+    .server-dot.err { background: var(--phish); }
+
+    /* Status card */
+    .status-card {
+      margin: 16px;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      text-align: center;
+      transition: all 0.3s;
+    }
+    .status-icon { font-size: 40px; margin-bottom: 10px; line-height: 1; }
+    .status-label {
+      font-size: 18px; font-weight: 700; margin-bottom: 4px;
+    }
+    .status-sub { font-size: 12px; color: var(--sub); }
+
+    .status-card.safe   { border-color: rgba(34,197,94,0.4);  background: rgba(34,197,94,0.07); }
+    .status-card.phish  { border-color: rgba(239,68,68,0.4);  background: rgba(239,68,68,0.07); }
+    .status-card.checking { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.05); }
+    .status-card.error  { border-color: rgba(107,114,128,0.4); background: rgba(107,114,128,0.05); }
+
+    .status-card.safe   .status-label { color: var(--safe); }
+    .status-card.phish  .status-label { color: var(--phish); }
+    .status-card.checking .status-label { color: var(--warn); }
+    .status-card.error  .status-label { color: var(--gray); }
+
+    /* Confidence bar */
+    .conf-section { padding: 0 16px 4px; }
+    .conf-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: var(--sub); margin-bottom: 6px;
+    }
+    .conf-track {
+      height: 5px; background: var(--border); border-radius: 99px; overflow: hidden;
+    }
+    .conf-fill {
+      height: 100%; border-radius: 99px;
+      transition: width 0.6s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* URL box */
+    .url-box {
+      margin: 12px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .url-label { font-size: 10px; color: var(--gray); margin-bottom: 4px; font-family: 'Space Mono', monospace; }
+    .url-text {
+      font-size: 11px; color: var(--sub);
+      word-break: break-all; line-height: 1.4;
+      max-height: 48px; overflow: hidden;
+    }
+
+    /* Features grid */
+    .features-title {
+      font-size: 11px; color: var(--gray);
+      padding: 4px 16px 8px;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .features-grid {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 6px; padding: 0 16px 8px;
+    }
+    .feature-chip {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 6px 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .feature-dot {
+      width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+    }
+    .feature-dot.good { background: var(--safe); }
+    .feature-dot.bad  { background: var(--phish); }
+    .feature-dot.mid  { background: var(--warn); }
+    .feature-name { font-size: 10px; color: var(--sub); }
+
+    /* Recheck button */
+    .recheck-btn {
+      display: block; width: calc(100% - 32px); margin: 4px 16px 16px;
+      background: transparent; border: 1px solid var(--border);
+      color: var(--sub); border-radius: 8px; padding: 9px;
+      font-size: 13px; font-family: 'DM Sans', sans-serif;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .recheck-btn:hover { border-color: #555; color: var(--text); }
+
+    /* Server error banner */
+    .server-banner {
+      margin: 12px 16px;
+      background: rgba(245,158,11,0.1);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 12px; color: #fcd34d; line-height: 1.5;
+    }
+    .server-banner strong { display: block; margin-bottom: 3px; }
+
+    .spin { display: inline-block; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">🛡</div>
+    <div class="header-text">
+      <h1>PhishGuard</h1>
+      <p>ML-powered phishing detector</p>
+    </div>
+    <div class="server-dot" id="serverDot" title="API server status"></div>
+  </div>
+
+  <div id="serverBanner" class="server-banner hidden">
+    <strong>⚠ API Server Offline</strong>
+    Run <code>python app.py</code> in the backend folder to enable detection.
+  </div>
+
+  <div class="status-card checking" id="statusCard">
+    <div class="status-icon" id="statusIcon">🔍</div>
+    <div class="status-label" id="statusLabel">Checking…</div>
+    <div class="status-sub" id="statusSub">Analyzing current page</div>
+  </div>
+
+  <div class="conf-section" id="confSection" style="display:none">
+    <div class="conf-label">
+      <span>Model Confidence</span>
+      <span id="confVal">—</span>
+    </div>
+    <div class="conf-track">
+      <div class="conf-fill" id="confFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="url-box" id="urlBox" style="display:none">
+    <div class="url-label">CURRENT URL</div>
+    <div class="url-text" id="urlText"></div>
+  </div>
+
+  <div id="featuresSection" style="display:none">
+    <div class="features-title">Signal Analysis</div>
+    <div class="features-grid" id="featuresGrid"></div>
+  </div>
+
+  <button class="recheck-btn" id="recheckBtn">↺ Re-analyse page</button>
+
+  <script src="popup.js"></script>
+</body>
+</html>
