@@ -1,7 +1,7 @@
 // PhishGuard - Background Service Worker v2
 // Collects DOM features from content script, then calls API
 
-const API_URL = "http://127.0.0.1:5000/predict";
+const API_URL = "https://phishguard-phishing-detector.onrender.com/predict";
 const CACHE = {};
 
 const BADGE = {
