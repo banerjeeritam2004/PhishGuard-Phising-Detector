@@ -1,6 +1,6 @@
 // PhishGuard - Popup Script (Fixed)
 
-const API_URL = "http://127.0.0.1:5000";
+const API_URL = "https://phishguard-phishing-detector.onrender.com";
 
 const FEATURE_NAMES = [
   "IP Address URL", "URL Length", "Shortener", "@ Symbol",
