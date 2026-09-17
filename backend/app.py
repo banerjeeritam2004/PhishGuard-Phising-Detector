@@ -194,5 +194,13 @@ def predict():
 def health():
     return jsonify({"status": "ok", "model_loaded": model is not None, "test": "NEW_CODE_123"})
 
+@app.route("/health-new", methods=["GET"])
+def health_new():
+    return jsonify({
+        "status": "ok",
+        "model_loaded": model is not None,
+        "test": "PHISHGUARD_NEW_456"
+    })
+
 if __name__ == "__main__":
     app.run(host="127.0.0.1", port=5000, debug=False)
